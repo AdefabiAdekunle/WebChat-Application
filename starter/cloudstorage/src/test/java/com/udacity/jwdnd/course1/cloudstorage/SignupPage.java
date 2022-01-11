@@ -22,6 +22,9 @@ public class SignupPage {
     @FindBy(css = "#submit-button")
     private WebElement submitButton;
 
+    @FindBy(css = "#login-link")
+    private WebElement buttonRedirect;
+
     public SignupPage(WebDriver webDriver) {
         PageFactory.initElements(webDriver, this);
     }
@@ -32,6 +35,10 @@ public class SignupPage {
         this.usernameField.sendKeys(username);
         this.passwordField.sendKeys(password);
         this.submitButton.click();
+    }
+
+    public void loginRedirect(){
+        buttonRedirect.click();
     }
 
 }

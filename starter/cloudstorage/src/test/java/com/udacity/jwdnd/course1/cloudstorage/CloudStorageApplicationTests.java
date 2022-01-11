@@ -1,5 +1,6 @@
 package com.udacity.jwdnd.course1.cloudstorage;
 
+import com.udacity.jwdnd.course1.cloudstorage.model.NoteForm;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.junit.jupiter.api.*;
 import org.openqa.selenium.By;
@@ -201,5 +202,46 @@ class CloudStorageApplicationTests {
 		}
 		Assertions.assertFalse(driver.getPageSource().contains("HTTP Status 403 – Forbidden"));
 	}
+
+	@Test
+	public void testSignUpAndLoginFlow(){
+		// Create a test account
+		doMockSignUp("URL","Test","UT","123");
+		//Login to the account
+		doLogIn("UT", "123");
+
+		Assertions.assertEquals("http://localhost:" + this.port + "/home", driver.getCurrentUrl());
+
+		HomePage homePage = new HomePage(driver);
+		homePage.logoutHomePage();
+
+		Assertions.assertEquals("http://localhost:" + this.port + "/login", driver.getCurrentUrl());
+
+	}
+
+	@Test
+	public void homePageRestriction() {
+		// Log in to our dummy account.
+		driver.get("http://localhost:" + this.port + "/home");
+
+		Assertions.assertEquals("http://localhost:" + this.port + "/login", driver.getCurrentUrl());
+	}
+
+	@Test
+	public void noteCreation(){
+		doMockSignUp("URL","Test","UT","123");
+		//Login to the account
+		doLogIn("UT", "123");
+
+		String noteId= "1";
+		String noteTitle = "To-test";
+		String noteDescription = "I want to use Selenium";
+		HomePage homePage = new HomePage(driver);
+		NoteForm noteForm =homePage.addNote(noteTitle,noteDescription,noteId);
+
+
+
+	}
+
 
 }
