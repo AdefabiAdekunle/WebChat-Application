@@ -32,8 +32,7 @@ import java.util.Map;
 @ControllerAdvice
 @RequestMapping("/home")
 public class HomeController {
-    //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
-    //https://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@github.com/AdefabiAdekunle/SuperDuperDrive1.git
+
     @Value("${spring.servlet.multipart.max-file-size}")
     private String maxFileSize;
 

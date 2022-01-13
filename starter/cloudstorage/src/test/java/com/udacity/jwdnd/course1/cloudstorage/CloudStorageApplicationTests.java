@@ -402,8 +402,8 @@ class CloudStorageApplicationTests {
      @Test
 	public void fileUploadAndDownload() throws InterruptedException {
 // Create a test account
-		 doMockSignUp("Large File","Test","LFT","123");
-		 doLogIn("LFT", "123");
+		 doMockSignUp("Large File","Test","LFK","123");
+		 doLogIn("LFK", "123");
 
 		 // Try to upload an arbitrary large file
 		 WebDriverWait webDriverWait = new WebDriverWait(driver, 2);
