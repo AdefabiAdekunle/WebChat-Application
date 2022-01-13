@@ -90,8 +90,8 @@ class CloudStorageApplicationTests {
 		// You may have to modify the element "success-msg" and the sign-up 
 		// success message below depening on the rest of your code.
 		*/
-		Assertions.assertTrue(driver.findElement(By.id("success-msg")).getText().contains("You successfully signed up!"));
-		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("login-link"))).click();
+		Assertions.assertTrue(driver.findElement(By.id("success-msg")).getText().contains("You've successfully signed up!"));
+		//webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("login-link"))).click();
 //		WebElement buttonSignUpRedirect = driver.findElement(By.id("button-redirect"));
 //		buttonSignUpRedirect.click();
 	}
