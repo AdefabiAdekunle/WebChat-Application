@@ -8,8 +8,9 @@ public class File {
     private int userId;
     private byte[] fileData;
 
-    public File(String fileName, String contentType, String fileSize, int userId, byte[] fileData) {
+    public File(int fileId,String fileName, String contentType, String fileSize, int userId, byte[] fileData) {
           //super();
+        this.fileId = fileId;
         this.fileName = fileName;
         this.contentType = contentType;
         this.fileSize = fileSize;

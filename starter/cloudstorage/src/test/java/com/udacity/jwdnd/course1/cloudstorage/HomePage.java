@@ -7,11 +7,14 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class HomePage {
     @FindBy(css="#logout-button")
     private WebElement logoutButton;
 
-    @FindBy(css="#noteModalLabel")
+    @FindBy(css="#nav-notes-tab")
     private WebElement noteModalTab;
 
     @FindBy(css="#add-note")
@@ -32,7 +35,11 @@ public class HomePage {
     @FindBy(css="#aResultSuccess")
     private WebElement clickContinue;
 
+    @FindBy(css="#note-title-text")
+    private WebElement noteTitleText;
 
+    @FindBy(css="#note-description-text")
+    private WebElement noteDescriptionText;
 
     public HomePage(WebDriver webDriver) {
         PageFactory.initElements(webDriver, this);
@@ -42,22 +49,10 @@ public class HomePage {
         logoutButton.click();
     }
 
-//    public void noteTab(){
-//        noteModalTab.click();
-//    }
-
-    public NoteForm addNote(String noteTitle, String noteDescription, String noteId){
+    public void noteTab(){
         noteModalTab.click();
-        addNewNote.click();
-        titleNote.sendKeys(noteTitle);
-        descriptionNote.sendKeys(noteDescription);
-        NoteForm noteForm = new NoteForm();
-        noteForm.setNoteId(noteId);
-        noteForm.setNoteTitle(noteTitle);
-        noteForm.setNoteDescription(noteDescription);
-        saveChanges.click();
-        clickContinue.click();
-        return  noteForm;
     }
+
+
 
 }

@@ -74,7 +74,7 @@ public class HomeController {
         String duplicateError=null;
         int currentUserId= userService.getUser(authentication.getName()).getUserId();
         for(MultipartFile file: files){
-            System.out.println(file.getSize());
+//            System.out.println(file.getSize());
                 int filesCount= fileService.getFileContent(file.getOriginalFilename()).size();
                 if(filesCount>0){
                     model.addAttribute("result", "notSaved");
@@ -111,6 +111,16 @@ public class HomeController {
                 .header(HttpHeaders.CONTENT_DISPOSITION,"attachment:filename=\""+file.getFileName()+"\"")
                 .body(new ByteArrayResource(file.getFileData()));
     }
+
+//    @GetMapping(
+//            value = "/downloadFile/{fileId}",
+//            produces = MediaType.APPLICATION_OCTET_STREAM_VALUE
+//    )
+//    public @ResponseBody
+//    byte[] downloadFile(@PathVariable Integer fileId) {
+//        return fileService.getFile(fileId).getFileData();
+//
+//    }
 
 
     @GetMapping("/deleteFile/{fileId}")

@@ -14,6 +14,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
 
 import java.io.File;
+import java.time.Duration;
+import java.util.List;
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class CloudStorageApplicationTests {
 
@@ -49,7 +52,7 @@ class CloudStorageApplicationTests {
 	 * PLEASE DO NOT DELETE THIS method.
 	 * Helper method for Udacity-supplied sanity checks.
 	 **/
-	private void doMockSignUp(String firstName, String lastName, String userName, String password){
+	private void doMockSignUp(String firstName, String lastName, String userName, String password)  {
 		// Create a dummy account for logging in later.
 
 		// Visit the sign-up page.
@@ -88,9 +91,9 @@ class CloudStorageApplicationTests {
 		// success message below depening on the rest of your code.
 		*/
 		Assertions.assertTrue(driver.findElement(By.id("success-msg")).getText().contains("You successfully signed up!"));
-		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("button-redirect")));
-		WebElement buttonSignUpRedirect = driver.findElement(By.id("button-redirect"));
-		buttonSignUpRedirect.click();
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("login-link"))).click();
+//		WebElement buttonSignUpRedirect = driver.findElement(By.id("button-redirect"));
+//		buttonSignUpRedirect.click();
 	}
 
 	
@@ -135,7 +138,7 @@ class CloudStorageApplicationTests {
 	 * https://review.udacity.com/#!/rubrics/2724/view 
 	 */
 	@Test
-	public void testRedirection(){
+	public void testRedirection()  {
 		// Create a test account
 		doMockSignUp("Redirection","Test","RT","123");
 		
@@ -156,10 +159,10 @@ class CloudStorageApplicationTests {
 	 * https://attacomsian.com/blog/spring-boot-custom-error-page#displaying-custom-error-page
 	 */
 	@Test
-	public void testBadUrl() {
+	public void testBadUrl() throws InterruptedException {
 		// Create a test account
-		doMockSignUp("URL","Test","UT","123");
-		doLogIn("UT", "123");
+		doMockSignUp("URL","Test","UTF","123");
+		doLogIn("UTF", "123");
 		
 		// Try to access a random made-up URL.
 		driver.get("http://localhost:" + this.port + "/some-random-page");
@@ -180,7 +183,7 @@ class CloudStorageApplicationTests {
 	 * https://spring.io/guides/gs/uploading-files/ under the "Tuning File Upload Limits" section.
 	 */
 	@Test
-	public void testLargeUpload() {
+	public void testLargeUpload() throws InterruptedException {
 		// Create a test account
 		doMockSignUp("Large File","Test","LFT","123");
 		doLogIn("LFT", "123");
@@ -204,7 +207,8 @@ class CloudStorageApplicationTests {
 	}
 
 	@Test
-	public void testSignUpAndLoginFlow(){
+	public void testSignUpAndLoginFlow() throws InterruptedException {
+		WebDriverWait wait = new WebDriverWait (driver, 3);
 		// Create a test account
 		doMockSignUp("URL","Test","UT","123");
 		//Login to the account
@@ -221,6 +225,7 @@ class CloudStorageApplicationTests {
 
 	@Test
 	public void homePageRestriction() {
+		WebDriverWait wait = new WebDriverWait (driver, 3);
 		// Log in to our dummy account.
 		driver.get("http://localhost:" + this.port + "/home");
 
@@ -228,19 +233,200 @@ class CloudStorageApplicationTests {
 	}
 
 	@Test
-	public void noteCreation(){
-		doMockSignUp("URL","Test","UT","123");
-		//Login to the account
-		doLogIn("UT", "123");
+	public void noteCreationAddDelete() throws InterruptedException {
+		WebDriverWait wait = new WebDriverWait (driver, 30);
+		JavascriptExecutor jse =(JavascriptExecutor) driver;
 
+		//SignUp for account
+		doMockSignUp("URL","Test","UTL","123");
+		//Login to the account
+		doLogIn("UTL", "123");
 		String noteId= "1";
 		String noteTitle = "To-test";
 		String noteDescription = "I want to use Selenium";
+
+		//addNote
+		WebElement notesTab = driver.findElement(By.id("nav-notes-tab"));
+		jse.executeScript("arguments[0].click()", notesTab);
+		wait.withTimeout(Duration.ofSeconds(30));
+		WebElement newNote = driver.findElement(By.id("add-note"));
+		wait.until(ExpectedConditions.elementToBeClickable(newNote)).click();
+		wait.until(ExpectedConditions.elementToBeClickable(By.id("note-title"))).sendKeys(noteTitle);
+		WebElement newNoteDescription = driver.findElement(By.id("note-description"));
+		newNoteDescription.sendKeys(noteDescription);
+		WebElement saveChanges = driver.findElement(By.id("save-changes"));
+		wait.until(ExpectedConditions.elementToBeClickable(saveChanges)).click();
+
+		//Check if the Note created was successfull
+		Assertions.assertEquals("Result",driver.getTitle());
+
+		//To check if the note created was successfull
+		WebElement redirectToHome = driver.findElement(By.id("aResultSuccess"));
+		redirectToHome.click();
+		 notesTab = driver.findElement(By.id("nav-notes-tab"));
+		jse.executeScript("arguments[0].click()", notesTab);
+		String currentNoteTitle= wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("note-title-text"))).getText();
+		String currentNoteDescription = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("note-description-text"))).getText();
+		//Check if the note created was displayed
+		Assertions.assertEquals(noteTitle,currentNoteTitle);
+		Assertions.assertEquals(noteDescription,currentNoteDescription);
+
+		//Logout the user
 		HomePage homePage = new HomePage(driver);
-		NoteForm noteForm =homePage.addNote(noteTitle,noteDescription,noteId);
+		homePage.logoutHomePage();
+
+
+		//Edit existing Note
+		//Login to the account
+		doLogIn("UTL", "123");
+		notesTab = driver.findElement(By.id("nav-notes-tab"));
+		jse.executeScript("arguments[0].click()", notesTab);
+		wait.withTimeout(Duration.ofSeconds(30));
+		wait.until(ExpectedConditions.elementToBeClickable(By.id("btnEditNote"))).click();
+		wait.until(ExpectedConditions.elementToBeClickable(By.id("note-title"))).clear();
+		wait.until(ExpectedConditions.elementToBeClickable(By.id("note-title"))).sendKeys("To-Test-Note");
+		saveChanges = driver.findElement(By.id("save-changes"));
+		wait.until(ExpectedConditions.elementToBeClickable(saveChanges)).click();
+		redirectToHome = driver.findElement(By.id("aResultSuccess"));
+		redirectToHome.click();
+		notesTab = driver.findElement(By.id("nav-notes-tab"));
+		jse.executeScript("arguments[0].click()", notesTab);
+		currentNoteTitle= wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("note-title-text"))).getText();
+		//check if the note edited was successful edited and displayed
+		Assertions.assertEquals("To-Test-Note",currentNoteTitle);
+
+
+		//Delete Note
+		wait.until(ExpectedConditions.elementToBeClickable(By.id("btnDeleteNote"))).click();
+		redirectToHome = driver.findElement(By.id("aResultSuccess"));
+		redirectToHome.click();
+		notesTab = driver.findElement(By.id("nav-notes-tab"));
+		jse.executeScript("arguments[0].click()", notesTab);
+		List<WebElement> noteList = driver.findElements(By.id("note-title-text"));
+		//Check if it note has been deleted
+		Assertions.assertEquals(0,noteList.size());
+
+	}
+
+	@Test
+	public void credentialCreationAddDelete() throws InterruptedException {
+		WebDriverWait wait = new WebDriverWait (driver, 30);
+		JavascriptExecutor jse =(JavascriptExecutor) driver;
+
+		//SignUp for account
+		doMockSignUp("URL","Test","UTK","123");
+		//Login to the account
+		doLogIn("UTK", "123");
+
+		String url = "www.w3Schools.com";
+		String username = "Adekunle";
+		String password = "Ikeoluwa_007";
+
+		//addCredential
+		WebElement credentialsTab = driver.findElement(By.id("nav-credentials-tab"));
+		jse.executeScript("arguments[0].click()", credentialsTab);
+		wait.withTimeout(Duration.ofSeconds(30));
+		WebElement newCredential = driver.findElement(By.id("add-credential"));
+		wait.until(ExpectedConditions.elementToBeClickable(newCredential)).click();
+		wait.until(ExpectedConditions.elementToBeClickable(By.id("credential-url"))).sendKeys(url);
+		WebElement newCredentialUsername = driver.findElement(By.id("credential-username"));
+		newCredentialUsername.sendKeys(username);
+		WebElement newCredentialPassword = driver.findElement(By.id("credential-password"));
+		newCredentialPassword.sendKeys(password);
+		WebElement saveChangesCredential = driver.findElement(By.id("save-changes-credential"));
+		wait.until(ExpectedConditions.elementToBeClickable(saveChangesCredential)).click();
+		//Check if the Credential  created was successfully
+		Assertions.assertEquals("Result",driver.getTitle());
+
+
+		//To check if the credential created  was successfully displayed
+		WebElement redirectToHome = driver.findElement(By.id("aResultSuccess"));
+		redirectToHome.click();
+		credentialsTab = driver.findElement(By.id("nav-credentials-tab"));
+		jse.executeScript("arguments[0].click()", credentialsTab);
+		String currentDescriptionUrl= wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("credential-url-text"))).getText();
+		String currentNoteDescriptionUsername = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("credential-username-text"))).getText();
+		String currentNoteDescriptionEncryptedPassword = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("credential-password-text"))).getText();
+		//Check if the note created was displayed
+		Assertions.assertEquals(url,currentDescriptionUrl);
+		Assertions.assertEquals(username,currentNoteDescriptionUsername);
+		Assertions.assertNotEquals(password,currentNoteDescriptionEncryptedPassword);
+
+		//Logout the user
+		HomePage homePage = new HomePage(driver);
+		homePage.logoutHomePage();
+
+		//Edit existing Note
+		//Login to the account
+		doLogIn("UTK", "123");
+		credentialsTab = driver.findElement(By.id("nav-credentials-tab"));
+		jse.executeScript("arguments[0].click()", credentialsTab);
+		wait.withTimeout(Duration.ofSeconds(30));
+		wait.until(ExpectedConditions.elementToBeClickable(By.id("btnEditCredential"))).click();
+		Thread.sleep(2000);
+		wait.until(ExpectedConditions.elementToBeClickable(By.id("credential-url"))).clear();
+		wait.until(ExpectedConditions.elementToBeClickable(By.id("credential-url"))).sendKeys("www.adekunle.com");
+		wait.until(ExpectedConditions.elementToBeClickable(By.id("credential-username"))).clear();
+		wait.until(ExpectedConditions.elementToBeClickable(By.id("credential-username"))).sendKeys("Adebayo");
+		saveChangesCredential = driver.findElement(By.id("save-changes-credential"));
+		wait.until(ExpectedConditions.elementToBeClickable(saveChangesCredential)).click();
+		redirectToHome = driver.findElement(By.id("aResultSuccess"));
+		redirectToHome.click();
+		credentialsTab = driver.findElement(By.id("nav-credentials-tab"));
+		jse.executeScript("arguments[0].click()", credentialsTab);
+		currentDescriptionUrl= wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("credential-url-text"))).getText();
+		 currentNoteDescriptionUsername = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("credential-username-text"))).getText();
+		currentNoteDescriptionEncryptedPassword = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("credential-password-text"))).getText();
+
+		//check if the note edited was successful edited and displayed
+		Assertions.assertEquals("www.adekunle.com",currentDescriptionUrl);
+		Assertions.assertEquals("Adebayo",currentNoteDescriptionUsername);
+
+
+		//Delete Credential
+		wait.until(ExpectedConditions.elementToBeClickable(By.id("btnCredentialDelete"))).click();
+		redirectToHome = driver.findElement(By.id("aResultSuccess"));
+		redirectToHome.click();
+		credentialsTab = driver.findElement(By.id("nav-credentials-tab"));
+		jse.executeScript("arguments[0].click()", credentialsTab);
+		Thread.sleep(2000);
+		List<WebElement> credentialList = driver.findElements(By.id("credential-url-text"));
+		//Check if it note has been deleted
+		Assertions.assertEquals(0,credentialList.size());
+
+
+	}
 
 
 
+     @Test
+	public void fileUploadAndDownload() throws InterruptedException {
+// Create a test account
+		 doMockSignUp("Large File","Test","LFT","123");
+		 doLogIn("LFT", "123");
+
+		 // Try to upload an arbitrary large file
+		 WebDriverWait webDriverWait = new WebDriverWait(driver, 2);
+		 String fileName = "barca1.jpg";
+
+		 webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("fileUpload")));
+		 WebElement fileSelectButton = driver.findElement(By.id("fileUpload"));
+		 fileSelectButton.sendKeys(new File(fileName).getAbsolutePath());
+
+		 WebElement uploadButton = driver.findElement(By.id("uploadButton"));
+		 uploadButton.click();
+		 try {
+			 webDriverWait.until(ExpectedConditions.presenceOfElementLocated(By.id("aResultSuccess")));
+		 } catch (org.openqa.selenium.TimeoutException e) {
+			 System.out.println("Large File upload failed");
+		 }
+
+		 WebElement redirectToHome = driver.findElement(By.id("aResultSuccess"));
+		 redirectToHome.click();
+		 Thread.sleep(2000);
+		String uploadedFileName= webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("fileName"))).getText();
+
+		Assertions.assertEquals(fileName,uploadedFileName);
 	}
 
 
